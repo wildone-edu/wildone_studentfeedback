@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 野灣職業體驗營：學員回饋牆</title>
+    <style>
+        :root {
+            --primary-color: #2e5c3e; /* 野灣綠 */
+            --accent-color: #e69038;  /* 溫暖橘 */
+            --suggest-color: #c0562f; /* 建議標示 */
+            --bg-color: #f4f7f2;
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 2.5rem 1rem 2rem;
+        }
+        h1 { margin: 0; font-size: 2rem; letter-spacing: 2px; }
+        p.subtitle { margin: 10px 0 0; font-size: 1.1rem; opacity: 0.9; }
+
+        /* 切換：依講師 / 依學員 */
+        .mode-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        .mode-tab {
+            background: transparent;
+            border: 2px solid rgba(255,255,255,0.7);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 999px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .mode-tab.active { background: white; color: var(--primary-color); border-color: white; }
+
+        /* 按鈕列 */
+        .nav-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            padding: 20px;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .nav-btn {
+            background-color: white;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 10px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 130px;
+            font-family: inherit;
+        }
+        .nav-btn .role { font-size: 0.8rem; font-weight: normal; margin-top: 4px; color: #666; }
+        .nav-btn:hover, .nav-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(46, 92, 62, 0.3);
+        }
+        .nav-btn:hover .role, .nav-btn.active .role { color: #e0e0e0; }
+
+        .nav-btn.overall { border-color: var(--accent-color); color: var(--accent-color); }
+        .nav-btn.overall:hover, .nav-btn.overall.active { background-color: var(--accent-color); color: white; }
+
+        /* 依講師看：按鈕排成一行，課程名稱不換行；螢幕太窄時左右滑動 */
+        .nav-container.one-row { flex-wrap: nowrap; overflow-x: auto; justify-content: safe center; gap: 8px; }
+        .nav-container.one-row .nav-btn { flex: 0 0 auto; min-width: 0; padding: 10px 12px; }
+        .nav-container.one-row .nav-btn .role { white-space: nowrap; font-size: 0.75rem; }
+
+        .nav-btn.student { min-width: 100px; }
+
+        /* 內容區 */
+        .content-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            flex-grow: 1;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .section-title {
+            text-align: center;
+            margin: 0 0 8px;
+            color: var(--primary-color);
+            font-size: 1.8rem;
+        }
+        .section-sub { text-align: center; color: #777; margin: 0 0 36px; }
+
+        .welcome-msg { text-align: center; margin-top: 60px; color: #888; }
+        .welcome-msg h3 { font-size: 1.5rem; margin-bottom: 10px; color: #555; }
+        .welcome-msg p { font-size: 1.1rem; margin: 6px 0; }
+
+        /* 卡片 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+        }
+        .card {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            transition: transform 0.3s ease;
+            border-top: 6px solid var(--accent-color);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.12); }
+        .card::before {
+            content: "“";
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            font-size: 5rem;
+            color: #f2f2f2;
+            font-family: serif;
+        }
+        .card.has-suggest { border-top-color: var(--suggest-color); }
+
+        .card-tag {
+            align-self: flex-start;
+            position: relative;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            background: #e7efe9;
+            padding: 4px 12px;
+            border-radius: 999px;
+            margin-bottom: 14px;
+        }
+        .suggest-badge {
+            align-self: flex-start;
+            position: relative;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: white;
+            background: var(--suggest-color);
+            padding: 4px 12px;
+            border-radius: 999px;
+            margin-bottom: 14px;
+        }
+        .card-text {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: #444;
+            margin-bottom: 25px;
+            white-space: pre-wrap;
+            position: relative;
+        }
+        .card-text mark {
+            color: inherit;
+            padding: 2px 0;
+        }
+        .card-text mark.suggest {
+            background: #fde7d9;
+            border-bottom: 2px solid var(--suggest-color);
+        }
+        .card-text mark.praise {
+            background: #e3f0e5;
+            border-bottom: 2px solid var(--primary-color);
+            font-weight: bold;
+        }
+        .legend { display: inline-flex; gap: 14px; margin-left: 10px; font-size: 0.9rem; }
+        .legend mark { color: inherit; padding: 1px 6px; }
+        .legend mark.praise { background: #e3f0e5; border-bottom: 2px solid var(--primary-color); }
+        .legend mark.suggest { background: #fde7d9; border-bottom: 2px solid var(--suggest-color); }
+        .card-footer {
+            margin-top: auto;
+            text-align: right;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 15px;
+            font-size: 0.95rem;
+            color: #777;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            background-color: #e9ecef;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; opacity: 0; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .nav-container { padding: 10px; gap: 8px; }
+            .nav-btn { padding: 8px 10px; font-size: 1rem; min-width: auto; flex: 1 1 45%; }
+            .nav-btn.student { flex: 1 1 30%; }
+            .nav-btn .role { font-size: 0.75rem; }
+            /* 手機上一行放不下，改成左右滑動 */
+            .nav-container.one-row { overflow-x: auto; justify-content: flex-start; -webkit-overflow-scrolling: touch; }
+            .nav-container.one-row .nav-btn { flex: 0 0 auto; }
+            .legend { display: flex; justify-content: center; margin: 8px 0 0; }
+            h1 { font-size: 1.5rem; }
+            .content-container { padding: 20px 15px; }
+            .grid { grid-template-columns: 1fr; gap: 20px; }
+            .card { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>2026 野灣職業體驗營</h1>
+    <p class="subtitle">想和講師們說的話</p>
+    <div class="mode-tabs">
+        <button class="mode-tab active" data-mode="instructor">依講師看</button>
+        <button class="mode-tab" data-mode="student">依學員看</button>
+    </div>
+</header>
+
+<nav id="nav" class="nav-container"></nav>
+
+<main class="content-container">
+    <h2 id="section-title" class="section-title" hidden></h2>
+    <p id="section-sub" class="section-sub" hidden></p>
+
+    <div id="welcome-msg" class="welcome-msg">
+        <h3>👋 歡迎來到回饋牆</h3>
+        <p>點選上方按鈕，查看學員們留下的心裡話。</p>
+        <p id="welcome-stats"></p>
+    </div>
+
+    <div id="card-grid" class="grid"></div>
+</main>
+
+<footer>
+    WildOne 野灣野生動物保育協會 - 2026 職業體驗營回饋整理
+</footer>
+
+<script>
+/* =====================================================================
+   資料區：之後要修改內容，只需要改這一段
+   ---------------------------------------------------------------------
+   1. INSTRUCTORS：講師按鈕。key 是講師名字，course 是按鈕下方的小字。
+      最後一個「野灣團隊」是整體回饋，會用橘色按鈕顯示。
+   2. FEEDBACK：每位學員一筆。欄位名稱要跟 INSTRUCTORS 的 key 一樣。
+      某位講師沒有留言，留空字串 "" 即可，頁面會自動略過。
+   3. HIGHLIGHTS：要畫重點的句子。
+      student = 學員名字，to = 給誰的留言，text = 要標示的那句話
+      （必須跟留言原文一字不差，才會畫上底色）
+      type = "praise"（具體稱讚，綠色）或 "suggest"（建議，橘色）
+   ===================================================================== */
+
+const INSTRUCTORS = [
+    {
+        "key": "穩翔",
+        "course": "野外調查工作、無線電追蹤"
+    },
+    {
+        "key": "庭娓",
+        "course": "自動相機架設、成果分享"
+    },
+    {
+        "key": "昀蓉",
+        "course": "認識野生動物醫療"
+    },
+    {
+        "key": "阿毛",
+        "course": "吹箭比賽"
+    },
+    {
+        "key": "蕾蕾",
+        "course": "野生動物照養、野食採集"
+    },
+    {
+        "key": "小天",
+        "course": "認識野生動物病理解剖"
+    },
+    {
+        "key": "魯夫",
+        "course": "夜間觀察及鳥類調查"
+    },
+    {
+        "key": "野灣團隊",
+        "course": "整體回饋"
+    }
+];
+
+const FEEDBACK = [
+    {
+        "name": "劉巧微",
+        "穩翔": "感謝您對於野外調查仔細的分享，讓我們彷彿真的到了現場搜索，對野外調查這份特別的工作有了認識，也感受到了您對野生動物滿滿的熱愛和努力。特別謝謝安排了無線電電追蹤的課程，讓我們真的有機會可以使用到這樣有趣且難以接觸到的工具。因為有這樣的課程，我才知道野生野放後竟然還需要如此辛苦的持續追蹤，也看見研究員們堅持不懈的精神，這都讓我很感動",
+        "庭娓": "謝謝您非常仔細的分享了自動照相機的使用與種種故事，能實際操作到自動相機架設是我完全無法想像的，如此昂貴的機器能親自體驗真的非常幸運，雖然我們這組只拍下了風吹草動，但我依然感到很感動，畢竟也是體驗到了。在課程中，我深深感受到您的熱情與對野生動物的愛，而那些被相機拍下的動物們也觸動了我，竟然還有人為了這件事而拼盡全力，真的非常非常感動",
+        "昀蓉": "透過您的分享，我窺見了野生動物臨床獸醫師的日常工作與心路歷程，也漸漸開始思考安樂死與動物福利的真正意義。而看見您在幾乎所有影片中關於安樂死與野放後死亡的心情，我也真正感受到身為一位獸醫的痛苦，真正理解到跨出這一步的辛苦與困難。在檢查大體老師時我也感受到診斷的不易，不像犬貓通常有有完整的病發過程，而是需要透過推測，更沒有完整的醫療所需數據，因此，我特別想感謝您願意為動物做這些事情！",
+        "阿毛": "雖然之前在獸醫營中體驗過吹箭，但我從未使用過真正的吹箭槍，非常榮幸可以有這個機會。再看到您的影片分享後我才知道，原來野生動物獸醫師也需要背著醫療工具上山找動物，不敢想像有多辛苦，您們真的太偉大了！！！",
+        "蕾蕾": "在來到這裡之前本以為野生動物在照顧的過程中會與照養員建立信任，完全沒想過會有需要全副武裝的餵食這件事，因為有您的分享，我終於有了初步的了解，也看見照養的不易。在課程中我也了解了動物福利的實際運用，同時，我看見了這份職業的意義與您的熱愛，讓我為之動容，感謝您願意付出心力，為保護野生動物盡力！",
+        "小天": "這是我首次聽到野生動物的病理解剖，在資料庫如此不完全的情況下，您不但沒有放棄病理解剖，反而不斷的努力著。在課程中您所分享的各種病歷都讓我感到非常震撼，牠們竟會受到如此對待。在解剖過程中，我也對於禽類有了更多的認識，也深深感受到病理解剖的重要性與您的熱愛，感謝您為保護野生動物而努力！",
+        "魯夫": "這次的夜間觀察雖然不是我的首次，但卻是我真正看見那麼多東西的一次，而鳥類調查我也覺得十分震撼，竟然聽叫聲就能清楚分辨品種，還能如此快速的帶我們找到鳥兒的蹤跡，非常感謝您讓我們有如此美妙的體驗",
+        "野灣團隊": "感謝大家舉辦這個最完美的營隊，謝謝所有講師、小隊輔、全體人員的辛苦付出，因為有你們，才能有這麼美好的體驗！看見你們對野生動物的付出，我感到特別感動也很感恩，有了你們，動物才有再次野放的機會，未來若有機會，我也要加入野灣，為動物盡一份力。"
+    },
+    {
+        "name": "施沛心",
+        "穩翔": "我原本就對這個工作非常有興趣，所以特別期待，我覺得穩翔老師講的東西都很清楚，讓我除了對這個職業嚮往，還多了更多實務面的認知。尤其在上追蹤發報課的時候，有一種夢想成真的感覺，原來電視上的人的感受是這樣啊～原來聽發報器的聲音超級困難的！最後職業訪談我也問了很多，謝謝穩翔老師沒有把我的問題當是非題回答，而是彷彿知道我有很多想暸解的，然後講得好仔細。希望我有朝一日可以真正體驗全部野外調查員的工作，也說不定是加入這個行列～",
+        "庭娓": "庭娓老師雖然害羞，但是很能感受到她很認真想讓我們懂、聽我們的問題。尤其是最後一天再收自動相機的時候，我又多認知到自動相機除了「拍到」還有什麼意義，我們家也有架，但是一直是以想知道有什麼動物這個初淺的目的來架設，我覺得我回家後一定會多思考我還能做什麼。也謝謝庭娓老師每一個影片都看，雖然空拍居多但老師不會直接跳過～～",
+        "昀蓉": "昀蓉獸醫師是一個好可愛的人，我覺得她很有感情，卻要做這個很需要放下的工作，是很勇敢的決定。透過她的引導，我們順利的找到大體老師白尾八哥的受傷，跟推測原因，她不只在我們找到結塊毛髮的時候引導我們找到傷口，還告訴我們更多延伸的知識，像是看起來是撕裂傷之類的，超級無私！",
+        "阿毛": "我第一眼看到阿毛獸醫師就覺得她好帥，小小一個人背著吹箭，然後感覺做的事情比很多高大的人還多、還有意義！吹箭實在是很難，除了瞄準難，麻醉劑量、地形、自身安全什麼都難！阿毛獸醫師不會有種高尚的感覺，她只是傳授經驗，跟協助我們，重要的是讓我們知道吹箭原來還要選部位，還有要確保動物的安全跟人類安全。",
+        "蕾蕾": "蕾蕾老師實在太酷了，誰廣告設計念一念會來照顧受傷的動物？我覺得她是一個很勇於實踐目標的人，謝謝她不斷提醒我們先做就對了，因為現在做的這件事情一定會對未來有幫助。在上課跟職業訪談也有很多之前不知道的事情，像是原來為了要讓大家比較好溝通出食物的大小，還要做成一個圖，而動物福利也是一直要擺在心中的一個核心，",
+        "小天": "我覺得小天老師給人一種很嚮往的感覺，很強又很溫柔，剛剛好第二天晚餐有同桌吃到飯，我就很期待晚上的課程，而晚上也沒讓我失望，簡直是整個身心靈都被地震一番，原來病理是這樣，雖然接觸更多的是死亡個體，但是卻能對未來救傷有更多進展跟改善。\n小天醫師說了一段話，關於不一定要念相關科系，才能為生態付出，設計也可以感變...我深受感觸，曾經想當建築師的我就是抱著這樣的理想，雖然我後來還是認為研究才會是我的興趣，但是這件事情會一直在我心中，不管未來走向哪，只要我願意想到自然，都有可能為自然貢獻。",
+        "魯夫": "上次遇到魯夫就一直很想再跟一次他的日夜關，沒想到過不久馬上圓夢，上次是小孩場，這次換我可以盡情學習與好奇。很喜歡魯夫都用觀察者的方式帶領，告訴我們要盡量開啟感官，怎樣才能看到動物，對動物越少驚擾是越好的。魯夫可以在一隻動物上講好久好久，這些資訊應該要在圖書館翻上好幾本書才會搜集到，雖然我知道我的腦容量不一定能全部記下來，但我還是很享受當下在聽解說的過程，真的很讚！然後我們沒有拍照給怡婷老師看，我竟然還可以自己遇到魯夫一次～",
+        "野灣團隊": "大爆哭然後什麼都講不清楚，我哭是因為太喜歡了，然後就會有這種反應，玉婷有一次說學員都很強隊輔好像不能給什麼，但我真心覺得你們帶給我的東西是數不盡的，我的問題所有野灣的人們都很盡力回答，重點是有這群人存在就很值得快樂了，沒有一個地方我不喜歡，因為學到的都是很實質的東西，環教組跟隊輔把我們照顧得無微不至，學員也很能互相學習，這也是我為什麼可以用發光雙眼過這四天～我很幸運能參與，你們很像我的加油站，也希望野灣的大家都能繼續傳達這個感動。"
+    },
+    {
+        "name": "呂亞信",
+        "穩翔": "利用無線電追蹤的技術來尋找野生動物需要極大的時間練習！當然也有所有的野生動物調查，需要極大的耐心和持久力。真的非常敬佩和仰慕您！",
+        "庭娓": "實際架設和復盤成果後才深切體會到利用自動相機來分析野生動物並不是相機綁上去就好的。非常欣賞您的觀察力，也希望我以後能訓練出這樣的野調能力！",
+        "昀蓉": "超級無敵欣賞和敬佩您！我是一個非常非常看重每一條生命的人。覺得您真的很厲害，尤其是在常常面對安樂死和受傷的動物時，能夠消化掉牠們帶來的壓力！對於這個特質和專業是我無法用言語形容的尊重！",
+        "阿毛": "講解的非常詳細！很喜歡集中目標的成就感，也體會到要集中好幾公尺外的個體所需的練習。",
+        "蕾蕾": "一次照顧這麼多的動物真的非常非常厲害！！！您的課程也讓我知道了野化訓練是多麽的重要。",
+        "小天": "解剖黑眉錦蛇真的是我最喜歡的一堂課。能夠現場看到自己最喜歡的動物的構造，是無法光靠書本的知識和來體會的！解剖課讓我實際的了解了蛇類的身體構造，讓我感覺我跟牠們又更親近了一些！也非常佩服您可以熟悉不同物種的身體構造並分析可能的病因或死因。",
+        "魯夫": "我覺得最帥的特長就是可以一看到某一種動物就立馬說出牠的物種，並且做出詳細介紹，在有需要時也可以非常輕鬆自在的移動和展示個體！您的專業是我最想要深度專精的技能，尤其是針對蛇類以及蛙類（食物鏈嘛.要看蛇就得看蛙）",
+        "野灣團隊": "感覺真的很幸運台灣東南部的野生動物有您們在保護！很謝謝您們不遺餘力的為台灣物種做出貢獻！大大大大大的RESPECT！"
+    },
+    {
+        "name": "陳子芃",
+        "穩翔": "我覺得在針對野外調查的這項任務中會面臨很多需要及時做出判斷的事情，像是在訪談中有提到，他們要去的目的地有很多條路線，他們選了A路線但是沒有辦法到達的時候只能選擇回頭，隔天再從B路線進去。在課程中我印象最深刻的體驗是尋找發報器，一開始在聽講解的時候覺得好像沒有很難，但是身為一個看google map有障礙的人，在用三角定位法的app時，根本是一團亂，那個h型天線我一凱使以為他會是越靠近發報器他的頻率就會越快，但其實不會，所以在找尋的時候就會相對更困難，而且發報器的定位點有可能會在你的四周，包括頭頂上的範圍，所以在找的時候一定要注意樹上。\n在體驗完，野外調查員的工作之後，我覺得除了看地圖這一方面需要多多加強之外，其餘的部分，例如登山、野營等這些技能我都可以做得很好，這一份工作不簡單，卻也是不可少的一部份。",
+        "庭娓": "哈哈哈~老師上課的時候講會的聲音都會讓我覺得催眠，但是可以感覺到老師分常有經驗，很長在吃飯時間的影片裡面看到他，因為我們跟自動相機相處的時間並沒有很長，但是這三天下來，我認為自動相機就很像是一個時空膠囊，就是你先放了，然後開始倒數著你甚麼時候會拿回來，然後你會很期待裡面的東西，而且當你打開他之後，會發現裡面有很多的驚喜在等著你，我們就有拍到山羌、環頸雉、遊蕩犬隻，這些除了狗狗是我預料之內，其他都遠超我預期，最後還有看到些專業拍到動物的畫面，在這堂課程體驗裡面，我印象刻的一句話是「空拍並不代表沒有」，我們很多組都拍到空拍，但是這並不表示這裡就沒有動物，只是他們沒有來拜訪而已。",
+        "昀蓉": "這一堂課是我第一次遇見大體老師，就算戴上手套，我還是無法抗拒我內心對於死掉的動物的那種婉惜的感覺，我習慣的是他們苦旖在我面前很快樂的活動著，而不是被尿布墊幫起來，還有在燈光的照射之下我看到他身體上的多處受傷，這件事情對我來說衝擊很大，所以我當下只有看我沒有做出太多的觸診跟觸摸。\n我也意識到在臨床的時候其實很多決定都不簡單，他是掌握生死大權的獸醫師，為了可以讓每一隻動物都遠離病痛以及痛苦，他把自己內心的猶豫以及懷疑放在了第二順位，我覺得這是一件值得敬佩和尊重的職業。",
+        "阿毛": "當時在一看到有穿件這一堂課的時候，我就在內心對自己說我一定要成為這15個人裡面的其中一個，因為這件事情，是很難在一班的營隊會有的，我參加了這們多，我還是第一次看到有這樣的體驗跟課程，在排隊吹箭的當下，我覺得好像沒有很難啊，我還反覆在譨腦裡想像了無數次，結果換我的時候我還是真正體會到了熟生巧這句話，我到了第三次才好不容易擊中，這讓我更加體會到，如果這是真實情況，我應該會直接被黑熊切一半吧，這是真的非常考驗技術及熟練度，所以我覺得可以把吹箭這個技術做到極致，也是非常的厲害。",
+        "蕾蕾": "這個工作其實是我最有興趣的，因為其實也有在其他地方持續做照養的工作，但是照養的物種跟野灣完全不一樣，比我做的東西複雜多了，我現在才知道他們會需要做非常多的評估，還有在餵藥上面如果動物抗拒吃藥的話，也會需要想很多解決辦法。在野食採集的部分照養也是費了很大的功夫，需要想到很後面，等到這隻動物野放之後會需要面對那些挑戰，讓他可以盡快熟悉。",
+        "小天": "襪~這個我非常有感，我覺得醫學這一塊經過體驗之後，不會是我未來的一個方向選擇，在進去解剖房，看到那一支我非常喜歡的蛇被放在夾鏈袋裡面，我的視覺跟心理提然湧上很多情緒，我知道死亡這個過程怎麼樣都避不掉，但是提早結束生命，並且是非自願性的，這才是讓我感到最難過的地方，在解剖的整個過程中，我保持著敬畏的心態在面對這件事情，我覺得老師說了一句我很喜歡也覺得這個方法非常不錯的觀點，我問他說，他從是這個職業是如何去面對情緒上的轉變還有壓力，他回答「他自己會去山，去森林裡面走走，看看那些還活在這個世界上的野生動物，現在過的怎麼樣，並且會更加希望透過這些大體老師，避免更多野生動物走上同一條路。」我聽完之後我覺得這是一個很棒很棒的觀點。",
+        "魯夫": "我突然發現一個很有趣的現象，就是我手機裡除了夜觀的照片還是夜觀的照片，夜觀很難得會看到蛇，因為好乾燥，但是我們看到很多很精緻的東西，竹節蟲、螳螂、紡織娘、蝴蝶跟蛾等，但是魯夫上課我最印象深刻的是賞鳥，我真的是超級印象深刻，因為之前賞鳥我幾乎是完全沒看到任何東西，這一次我看到超級多，幾乎每一種都有看到，我最喜歡看的還是那個甚麼山椒......就是公鳥是亮橘色，母鳥是黃色的那一種，我覺得好美，真的好漂亮，雖然要很早起來，Btw我覺得魯夫的講解非常詳細，也會補充很多。",
+        "野灣團隊": "終於到了這個環節，我覺得這三天的課程，我都非常喜歡，野灣是一個我有一直在臉書上關注的一個組織，在一開始沛心跟我說要來報名的時候，我其實內心沒有抱太大的希望，因為全國選15個欸，我怎麼可能上，我覺得我就只有去青年百億計畫的時侯運氣全都用在那一次了，結果我才剛參加完台大舉辦的自然保育營，我就看到野灣公告了入選名單，我很感動，因為我第一眼就看到我的名字。\n每天晚上我都很興奮地打電話把拔馬麻說我今天上什麼課，然後我的收穫是什麼，我還一度講到哽咽，我覺得這些野灣的工作者都奉獻最大的努力，在為野生動物盡一份心力，很多話都很難用言語形容，但是就像沛心在最後一天說的，我們很難得可以跟一群對於野生動物非常有感的人一起學習、一起交流，野灣就像是一個流水線，每一個都在做好自己的本分，一起協調根討論出對於野生動物最佳的改善方法，很謝謝野灣這一次有開這一團，裡面的每一個人真的都非常的棒!!!!!!!!，太喜歡你們了~"
+    },
+    {
+        "name": "李詠欣",
+        "穩翔": "謝謝穩翔研究院的分享，在這堂課中透過經驗分享和實際的操作，讓我更加理解調查員的工作內容。在實際操作中發現在野外的調查蠻困難的，我們在操作時的場地是在大草原，我想野外的話就不一定是這麼空曠的地方，可能還會因為氣候及地形的影響，讓整個追蹤調查更加困難，所以真的覺得這個工作很不容易，最後在訪談的過程中，也有提到自己寫程式AI來提高工作的效率，與時俱進，超級厲害👍",
+        "庭娓": "在體驗架設自動相機的過程中，我們小組原本並沒有抱太大的期待，沒想到最後竟然拍攝到三種不同的動物，其中最讓我驚喜的是山羌，真的覺得非常酷！這次的體驗讓我感受到野外調查的樂趣，也更加期待透過自動相機，觀察野生動物在自然環境中的活動情形。非常感謝庭娓研究員的指導，讓我們了解如何在野外架設自動相機、選擇合適的設置地點，以及相關的注意事項。透過這次實際操作，我對野生動物調查的方法有了更具體的認識，也體會到適當的地點選擇與設備架設，對於蒐集野生動物的活動紀錄有多麼重要🙂‍↕️🙌",
+        "昀蓉": "我覺得獸醫師超帥超可愛🤣\n在獸醫師的課程中，我了解到即使考取了獸醫師執照，仍然需要持續進修，讓我深刻體會到學習是一條永無止境的道路。尤其是野生動物獸醫師，每一次的病例都是新的學習機會。令我印象深刻的是，不同物種的器官構造、常見疾病及受傷情況都可能有所差異，因此獸醫師必須依據不同物種的特性，靈活轉換思考方式，判斷適合的診療方法。我認為這不僅需要扎實的專業知識，更需要長期的實務經驗與不斷累積的觀察能力，才能更準確地判斷動物的狀況，給予適當的治療。這也讓我更加敬佩野生動物獸醫師的專業與付出，並體會到持續學習對於成為一名優秀獸醫師的重要性。",
+        "阿毛": "謝謝阿毛獸醫師的介紹，也讓我們實際體驗吹箭，我們體驗的時候是在平地直直的吹，平地吹的時候就很有難度了，感覺到野外就更難，需要很穩的手和心，穩定住才可以吹到恰好的位置🧐",
+        "蕾蕾": "蕾蕾也超可愛:D\n在這個課堂中知識量也是滿滿，從認識保育員在做的工作內容，到最後實作，尤其在最後的野放評估表，一個不及格結果就是安樂死或收容，以及找到停損點。雖然覺得很果斷，但若是就這樣野放，他們後續遭遇到的痛苦會更多。謝謝蕾蕾🙌",
+        "小天": "在整個課程中最印象深刻的課，因為在這堂課的反思很多，我覺得也讓我想到在導覽中拿到小卡的問題，為什麼人要救治野生動物。\n因為人和動物生存在同一個環境，而人常常直接或間接的導致野生動物的死亡。就像我們在解剖的大體老師，就是因為窗殺，推測可能是內臟撞擊出血的原因而死亡。另外一個解剖的大體，也推測可能是被車子壓到，內臟破裂而死亡。\n另外我覺得老師很強，護理轉獸醫😯",
+        "魯夫": "謝謝老師兩次的帶到紅石林道夜觀和賞鳥，我是第一次賞鳥，真的完全被吸引，也覺得我超級可惜，住在花東，還是在部落的孩子，在自己生活的地方都不知道有什麼。另外在夜觀的時候，有一種小時候和爸爸打獵的感覺（現在沒有了啦）但不同的是我們是走河道，看到的跟在林道走又不太一樣。\n謝謝老師的帶領，我會在花東學習抬頭看👀",
+        "野灣團隊": "謝謝野灣用心籌辦此次的營會，讓我能夠在這當中更加認識野灣，而且每一餐都量大又好吃。\n也謝謝小隊輔一直幫忙處理許多事，也一直幫忙裝水，辛苦了🫡\n也謝謝用心準備課程的研究員、獸醫師、照養員、特約講師，每堂課都收穫滿滿！並且我覺得每個工作都需要細心以及不停累積的實務經驗才可以在這個領域中隨機應變。\n另外，你們真的很親切，雖然是第一天剛認識，但你們卻很熱情的與我們打招呼，也很認真的回答我們的疑問，在這三天的營隊當中，我感受到野灣這個團隊友善，團隊之間很像家人的感覺🤣\n我覺得整個營隊中，時間都抓得很好，也很多體驗，還有可以藉此機會遇到一群志同道合的朋友，真的超級難得，非常感謝野灣團隊🥹💗🙌"
+    },
+    {
+        "name": "蕭沛緹",
+        "穩翔": "很喜歡老師講解關於野外調查的相關工作，體驗時覺得追蹤方面很有興趣，但讓我對於野調工作方面更了解，了解到說細心與耐心是不可和缺，很有可能一整天都沒有動物，這可能就是日常。",
+        "庭娓": "原本我們這組沒抱什麼太大的期望，想說找個偏僻的地方可能有鳥類的或流浪動物，結果竟然出現山羌跟環頸雉，非常訝異＆開心，也讓我了解到其實野調並不是每次都有收穫，而是一次次累積來的。",
+        "昀蓉": "課程裡面學習到有關於很多未來的職業方向與學習資源運用，並且實作包紮時，也讓我們試著觀察大體，去判斷死傷原因，讓我覺得超酷的，了解到以前不會接觸到的知識",
+        "阿毛": "一開始看老師示範的時候覺得看起來很好吹，而換作我們的時候，才發覺不是一件簡單的事情，更何況有時動物狀況會有很多變化，謝謝老師讓我們體驗到特別的經驗",
+        "蕾蕾": "上完課後，覺得照養需要花費很多心力去照顧動物，隨時一個不小心都有可能讓動物生病或是死亡，並且還要根據動物們的食性去採集各種植物，體驗完後覺得原來照養員要做的事情比我們想像的還要多",
+        "小天": "從觀察外傷到解剖大體我都覺得超酷的，因為在校內很少能接觸到這方面，覺得從一個微小的細節就可以慢慢推理出受傷致死的原因，超級有趣",
+        "魯夫": "夜觀超級好玩，會出現很多白天我們不常發現或看不到的東西，發現原來晚上的森林也如此熱鬧。鳥調時也因為老師認識更多關於鳥類特徵知識，而且還很幸運看到以前沒看到的鳥種，覺得這兩天收穫滿滿",
+        "野灣團隊": "謝謝你們辦了這個活動讓我們這群對於動植物保育或是相關領域有興趣的人能相遇，並且交流自己未來的走向跟看法，來了這次活動之後讓我更加確定自己未來想走的方向，而這三天的課程設計都很有趣，老師們都很用心、盡心的在教我們，讓我在這三天收穫滿滿，希望以後可以再有機會來野灣！"
+    },
+    {
+        "name": "吳亞飛",
+        "穩翔": "謝謝你跟我分享AI在調查員上的運作！我自己很喜歡爬山，所以看到你們在野外分享的一些照片跟影片都覺得很有趣，無線電追蹤的課程也很好玩，我在野灣營隊之前都不知道市面上有哪一些可以追蹤動物的方式，這次學到還有分兩種就是被動跟主動追蹤！",
+        "庭娓": "謝謝你回答有關於我對野外調查員的問題！設置相機確實追蹤的很大一個部分，看到你們相機拍出來的畫面，都覺得很神奇也很酷！\n相機的課程很有趣，沒想到我們架設的地點會有山羌出沒！",
+        "昀蓉": "謝謝你回答我這麼多不管是國外還是動保法的問題！\n這次的課程很充足，我本來對鳥類其實並不是那麼了解，但這次我學到鳥類的基礎部位，以及如何診斷，是個很好玩的課程！",
+        "阿毛": "謝謝你教我們如何吹箭！\n很抱歉摔了兩次如此昂貴的吹箭，希望它沒有壞掉。\n以前在六福村實習時，其實常常看到獸醫師在用吹箭，但礙於自己不是獸醫師或獸醫實習生所以在他們訓練的時候沒有體驗到。但藉由這次經驗終於體驗到了！也學到其實它並沒有想像中的簡單。",
+        "蕾蕾": "謝謝你回答我有關於海外的問題！\n動物福祉這方面，我原本上課的時候就有學過，但這次我學到了真正運用在野生動物上面時的情況。我很喜歡你的分享！也很想做做看穿山甲蛋糕！",
+        "小天": "謝謝你在第二天晚餐跟最後一天回答我這麼多問題！\n我自己對病理是非常有興趣，之前在六福村實習之後就很喜歡解剖跟病理研究！這次蛇的解剖很酷，我學到了很多東西，這也是我第一次看到蛇身體的內部！",
+        "魯夫": "以往爬山時都不會注意到鳥，這次鳥類調查發現原來在低海拔區域就已經出現這麼多種台灣的特有種。我已經買好望遠鏡，等著明年預計去玉山跟大霸等高海拔區域時，帶著我學弟妹一起觀鳥了！",
+        "野灣團隊": "謝謝你們給我這麼好的機會學到了超級超級多東西，其實關於未來這條路，還在高中生的我，是很迷茫的事情，就算我休學一年，也還是不知道人生這條路應該要怎麼走。但這次野灣的營隊，讓我真正的感受到與野生動物方面工作的有趣，希望明年可以在考完大學之後加入志工的行列！\np.s 這幾天的飯可能有一點點太多了，我很想吃完但真的吃不完，之後如果想要減少浪費的話，或許可以把便當的份量減少一點！"
+    },
+    {
+        "name": "葉梓紅",
+        "穩翔": "謝謝你用心回答我們的問題，我覺得無線電追蹤很好玩。還有平常工作辛苦了。",
+        "庭娓": "謝謝你認真的教我們怎麼架相機，最後真的有拍到山羌和白鹿絲，真的超驚喜，我想這就是做研究時得到好的結果和回報後的喜悅吧！",
+        "昀蓉": "謝謝你在短短的50分鐘內講了好多專業獸醫知識，接著帶我們做了鳥類翅膀包紮。聽講時我感受得到你是真的很愛你的職業，你即使知道野生動物獸醫賺的錢比其他獸醫還要少，工作時間很不固定，但還是選擇留下來幫助野生動物。\n在了解了野灣是什麼、野生動物獸醫在做什麼之後，我覺得我對當野生動物獸醫好像比當一般小動物獸醫還要更有興趣，我感覺假設我當小動物獸醫，這隻小動物不一定要給我醫治，它也一定有其他獸醫可以幫助牠，但是在台灣真的很少野生動物獸醫，但我們的野生動物其實很需要更多人力來幫助並醫治牠們，還有我十分認同野灣的理念，那就是教育民眾、做科學研究和動物醫治要一起並行，只有做醫療是不行的。\n假設我之後真的來這裡當野生動物獸醫，我的工作除了當野生動物獸醫，還可能像現在這樣，可以讓更多人了解到野生動物的困境，甚至像現在的我被啟發一樣，我或許能當那個啟發更多人想來當野生動物獸醫的人？！我覺得這是我能發揮更多影響力的地方。\n謝謝你啟發我，讓我萌生了想當野生動物獸醫的念頭，最後想跟你說平常工作辛苦了，加油💪",
+        "阿毛": "謝謝你用有趣的方式帶我們認識獸醫在野外的工作之一。除了吹箭，獸醫在野外的其他工作也很不輕鬆，包括麻醉後的緊急處理，還有你有提到的如果動物其實沒有完全昏迷，人類需要很即時的反應去防禦自己，這真的是一份風險很高的工作，辛苦了。",
+        "蕾蕾": "我很欣賞保育員可以做這麼煩雜工作，還有你們對每隻動物不同的照顧方式、環境佈置和餵食方法等等都很講究，多虧有你們像保姆一樣的存在，動物才能好好接受治療和野放訓練，到野放的前一刻，也是你們在把關他們的野放評估，可以說是動物入院後最密切接觸也是最重要的角色之一。\n還有一次照顧200隻雨燕真的太猛啦😱",
+        "小天": "我覺得病理獸醫是所有野灣的工作裡壓力最大的職業，看著心愛的動物慘死的樣子後，還要把祂們切開分析祂們的死因，不過就像你在解剖室時講的，只要這份資料之後能幫助到更多動物，現在做的事就是有價值的。另外也謝謝你詳細的講解解剖時獸醫會注意哪些地方，哪些可能是判斷死因的證據，還有也謝謝你認真回答我們的問題。",
+        "魯夫": "可以一次記住這麼多物種的特徵和叫聲真的好厲害，謝謝你對各種動物還有他們的習性、棲地的詳細講解。",
+        "野灣團隊": "謝謝野灣讓我們參加這麼棒的活動，每個講師都是百忙之中抽空出來，分享自己的職業還有工作經驗給我們。不只如此，就連活動的時間規劃、準備小點心等等的細節，都做的很完善。\n經過經過這次的體驗營，不只讓我知道野生動物保育有多麼的不容易，每個人每個角色都是幫助野生動物救傷不可獲缺的角色，這次營隊也讓我有更多動力好好讀書，為我的夢想職業努力，還有這次我更認識了很多和我一樣愛動物的朋友，真的很謝謝野灣。\n之後有機會我也有想去你們那裡實習或當志工，到時候再見面吧🥰\n最後最後就是想跟每個人說：大家工作辛苦了，加油！這份職業可能很冷門，大部分的民眾可能都不太了解，但你們的努力總有一天會回到地球的，對環境動物和人類來說，因為有你們在這方面的努力，才有現在美麗的臺灣。"
+    },
+    {
+        "name": "林庭妤",
+        "穩翔": "上了這堂課才知道不只是把動物照顧好後野放就可以了，去追蹤動物的後續的情況如何，也是非常重要的工作\n對您印象比較深的是在後續問問題時有問道的問題，關於ai融合野外調查這件事，真的覺得您很厲害！能夠跟ai合作寫出一個能夠自動追蹤與分析資料的程式，真的真的非常厲害！",
+        "庭娓": "架設相機真的很有趣！沒想到會拍到很多意外之喜，山羌耶！！真的非常喜歡架設相機這個環節，綁在相機上的小紙條的內容也非常有趣！",
+        "昀蓉": "非常喜歡這個課程，讓我了解了如何判別鳥類的傷勢與如何固定鳥的翅膀！我從小就非常喜歡鳥，所以能了解鳥類撞窗會有什麼樣的傷勢，這件事情讓我覺得很有意義！",
+        "阿毛": "吹箭真的是一堂很有趣的課程！了解吹箭的操作和注意事項，還有接下來的比賽都是我非常喜歡的一堂課程\n對吹箭非常印象深刻還有一個原因，我之前有看過一篇國文課文是在寫一個台灣黑熊的研究員去野外抓熊，並且紀錄的\n對那篇文非常有印象",
+        "蕾蕾": "小時候就對保育員這個職業有好奇和興趣，所以非常期待這次的營隊！老師的課程都有回答到我心中對這個職業的疑惑，真的讓我受益良多！",
+        "小天": "動物的法醫，沒有想過這個工作這麼重要！判斷動物的死因然後看能不能做出改變，這個工作真的非常重要且有價值\n第一次看蛇類的解剖，感覺很新奇，器官都長長的。台灣的蛇類好像被路殺的非常多，希望能早日做出改變",
+        "魯夫": "第一次跟著專業的人員去夜觀與鳥類調查，很喜歡老師每發現一個物種就滔滔不絕的跟我們說這個物種的習性之類的，真的讓我受益良多！\n我非常喜歡鳥，鳥類調查時，教我們如何觀鳥，與如何辨識鳥類的技巧，還有您對鳥的豐富了解，都讓我想去更多了解與觀察更多「鳥」這個物種",
+        "野灣團隊": "謝謝野灣的工作人員們非常認真的準備這次的營會！也非常幸運能夠參加這次的營隊！能夠更了解這個職業真的讓我非常開心！也讓我更確定了未來的方向！"
+    }
+];
+
+const HIGHLIGHTS = [
+    {
+        "student": "施沛心",
+        "to": "野灣團隊",
+        "type": "praise",
+        "text": "我的問題所有野灣的人們都很盡力回答"
+    },
+    {
+        "student": "施沛心",
+        "to": "野灣團隊",
+        "type": "praise",
+        "text": "因為學到的都是很實質的東西"
+    },
+    {
+        "student": "施沛心",
+        "to": "野灣團隊",
+        "type": "praise",
+        "text": "環教組跟隊輔把我們照顧得無微不至"
+    },
+    {
+        "student": "施沛心",
+        "to": "野灣團隊",
+        "type": "praise",
+        "text": "學員也很能互相學習"
+    },
+    {
+        "student": "陳子芃",
+        "to": "野灣團隊",
+        "type": "praise",
+        "text": "野灣就像是一個流水線，每一個都在做好自己的本分，一起協調根討論出對於野生動物最佳的改善方法"
+    },
+    {
+        "student": "李詠欣",
+        "to": "野灣團隊",
+        "type": "praise",
+        "text": "而且每一餐都量大又好吃"
+    },
+    {
+        "student": "李詠欣",
+        "to": "野灣團隊",
+        "type": "praise",
+        "text": "也謝謝小隊輔一直幫忙處理許多事，也一直幫忙裝水"
+    },
+    {
+        "student": "李詠欣",
+        "to": "野灣團隊",
+        "type": "praise",
+        "text": "你們卻很熱情的與我們打招呼，也很認真的回答我們的疑問"
+    },
+    {
+        "student": "李詠欣",
+        "to": "野灣團隊",
+        "type": "praise",
+        "text": "團隊之間很像家人的感覺"
+    },
+    {
+        "student": "李詠欣",
+        "to": "野灣團隊",
+        "type": "praise",
+        "text": "我覺得整個營隊中，時間都抓得很好，也很多體驗"
+    },
+    {
+        "student": "蕭沛緹",
+        "to": "野灣團隊",
+        "type": "praise",
+        "text": "這三天的課程設計都很有趣，老師們都很用心、盡心的在教我們"
+    },
+    {
+        "student": "葉梓紅",
+        "to": "野灣團隊",
+        "type": "praise",
+        "text": "就連活動的時間規劃、準備小點心等等的細節，都做的很完善"
+    },
+    {
+        "student": "吳亞飛",
+        "to": "野灣團隊",
+        "type": "suggest",
+        "text": "p.s 這幾天的飯可能有一點點太多了，我很想吃完但真的吃不完，之後如果想要減少浪費的話，或許可以把便當的份量減少一點！"
+    }
+];
+
+/* ===================== 以下是頁面運作程式，通常不用改 ===================== */
+
+const TEAM_KEY = '野灣團隊';
+let mode = 'instructor';
+
+const nav = document.getElementById('nav');
+const grid = document.getElementById('card-grid');
+const titleEl = document.getElementById('section-title');
+const subEl = document.getElementById('section-sub');
+const welcomeEl = document.getElementById('welcome-msg');
+
+function courseOf(key) {
+    const found = INSTRUCTORS.find(i => i.key === key);
+    return found ? found.course : '';
+}
+
+// 找出這則留言裡要畫重點的位置（依出現順序排列）
+function highlightsFor(student, to, content) {
+    return HIGHLIGHTS
+        .filter(h => h.student === student && h.to === to && content.includes(h.text))
+        .map(h => ({ ...h, pos: content.indexOf(h.text) }))
+        .sort((a, b) => a.pos - b.pos);
+}
+
+// 建立元素的小工具：一律用 textContent，學員輸入的任何符號都不會被當成程式碼
+function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+}
+
+function buildCard(item, index) {
+    const card = el('article', 'card fade-in');
+    card.style.animationDelay = `${index * 0.05}s`;
+
+    if (item.label) card.appendChild(el('span', 'card-tag', item.label));
+
+    const marks = highlightsFor(item.student, item.to, item.content);
+    const text = el('div', 'card-text');
+
+    if (marks.some(m => m.type === 'suggest')) {
+        card.classList.add('has-suggest');
+        card.appendChild(el('span', 'suggest-badge', '💡 建議'));
+    }
+
+    let cursor = 0;
+    marks.forEach(m => {
+        if (m.pos < cursor) return; // 重疊的標示略過
+        text.appendChild(document.createTextNode(item.content.slice(cursor, m.pos)));
+        text.appendChild(el('mark', m.type, m.text));
+        cursor = m.pos + m.text.length;
+    });
+    text.appendChild(document.createTextNode(item.content.slice(cursor)));
+
+    card.appendChild(text);
+    card.appendChild(el('div', 'card-footer', `— ${item.footer}`));
+    return card;
+}
+
+function render(title, sub, items) {
+    welcomeEl.hidden = true;
+    titleEl.hidden = false;
+    subEl.hidden = false;
+    titleEl.textContent = title;
+    subEl.textContent = sub;
+
+    // 有畫重點時，在副標題旁加上顏色說明
+    const types = new Set(items.flatMap(i => highlightsFor(i.student, i.to, i.content).map(m => m.type)));
+    if (types.size) {
+        const legend = el('span', 'legend');
+        if (types.has('praise')) legend.appendChild(el('mark', 'praise', '具體稱讚'));
+        if (types.has('suggest')) legend.appendChild(el('mark', 'suggest', '建議'));
+        subEl.appendChild(legend);
+    }
+    grid.replaceChildren(...items.map(buildCard));
+
+    if (window.innerWidth < 600) {
+        window.scrollTo({ top: nav.offsetTop + nav.offsetHeight, behavior: 'smooth' });
+    }
+}
+
+function setActive(btn) {
+    nav.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+function showInstructor(key) {
+    const items = FEEDBACK
+        .filter(f => f[key] && f[key].trim())
+        .map(f => ({ student: f.name, to: key, content: f[key].trim(), footer: f.name }));
+    const title = key === TEAM_KEY ? '學員給 野灣團隊 的整體回饋' : `學員給 ${key} 的回饋`;
+    render(title, `${courseOf(key)}｜共 ${items.length} 則`, items);
+}
+
+function showStudent(name) {
+    const f = FEEDBACK.find(x => x.name === name);
+    const items = INSTRUCTORS
+        .filter(i => f[i.key] && f[i.key].trim())
+        .map(i => ({
+            student: name,
+            to: i.key,
+            content: f[i.key].trim(),
+            label: i.key === TEAM_KEY ? '給 野灣團隊' : `給 ${i.key}｜${i.course}`,
+            footer: name
+        }));
+    render(`${name} 的回饋`, `共寫給 ${items.length} 個對象`, items);
+}
+
+function buildNav() {
+    nav.replaceChildren();
+    nav.classList.toggle('one-row', mode === 'instructor');
+
+    if (mode === 'instructor') {
+        INSTRUCTORS.forEach(i => {
+            const btn = el('button', 'nav-btn' + (i.key === TEAM_KEY ? ' overall' : ''));
+            btn.appendChild(document.createTextNode(i.key));
+            btn.appendChild(el('span', 'role', i.course));
+            btn.addEventListener('click', () => { setActive(btn); showInstructor(i.key); });
+            nav.appendChild(btn);
+        });
+    } else {
+        FEEDBACK.forEach(f => {
+            const btn = el('button', 'nav-btn student', f.name);
+            btn.addEventListener('click', () => { setActive(btn); showStudent(f.name); });
+            nav.appendChild(btn);
+        });
+    }
+}
+
+function resetView() {
+    grid.replaceChildren();
+    titleEl.hidden = true;
+    subEl.hidden = true;
+    welcomeEl.hidden = false;
+}
+
+document.querySelectorAll('.mode-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        if (tab.dataset.mode === mode) return;
+        mode = tab.dataset.mode;
+        document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t === tab));
+        buildNav();
+        resetView();
+    });
+});
+
+document.getElementById('welcome-stats').textContent =
+    `今年共有 ${FEEDBACK.length} 位學員留下回饋。`;
+
+buildNav();
+</script>
+
+</body>
+</html>
