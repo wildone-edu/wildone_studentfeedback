@@ -33,25 +33,6 @@
         h1 { margin: 0; font-size: 2rem; letter-spacing: 2px; }
         p.subtitle { margin: 10px 0 0; font-size: 1.1rem; opacity: 0.9; }
 
-        /* 切換：依講師 / 依學員 */
-        .mode-tabs {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 20px;
-        }
-        .mode-tab {
-            background: transparent;
-            border: 2px solid rgba(255,255,255,0.7);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 999px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .mode-tab.active { background: white; color: var(--primary-color); border-color: white; }
-
         /* 按鈕列 */
         .nav-container {
             display: flex;
@@ -99,7 +80,6 @@
         .nav-container.one-row .nav-btn { flex: 0 0 auto; min-width: 0; padding: 10px 12px; }
         .nav-container.one-row .nav-btn .role { white-space: nowrap; font-size: 0.75rem; }
 
-        .nav-btn.student { min-width: 100px; }
 
         /* 內容區 */
         .content-container {
@@ -208,6 +188,27 @@
             font-weight: bold;
         }
 
+        .to-top {
+            display: none;
+            position: fixed;
+            right: 16px;
+            bottom: 20px;
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 999px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 0.9rem;
+            font-weight: bold;
+            font-family: inherit;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+        .to-top[hidden] { display: none !important; }
+
         footer {
             text-align: center;
             padding: 30px;
@@ -222,19 +223,38 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* ===== 手機版 ===== */
         @media (max-width: 600px) {
-            .nav-container { padding: 10px; gap: 8px; }
-            .nav-btn { padding: 8px 10px; font-size: 1rem; min-width: auto; flex: 1 1 45%; }
-            .nav-btn.student { flex: 1 1 30%; }
-            .nav-btn .role { font-size: 0.75rem; }
-            /* 手機上一行放不下，改成左右滑動 */
-            .nav-container.one-row { overflow-x: auto; justify-content: flex-start; -webkit-overflow-scrolling: touch; }
-            .nav-container.one-row .nav-btn { flex: 0 0 auto; }
+            header { padding: 1.6rem 1rem 1.4rem; }
+            h1 { font-size: 1.5rem; letter-spacing: 1px; }
+            p.subtitle { font-size: 1rem; margin-top: 6px; }
+
+            /* 講師按鈕改成兩欄排列，不需左右滑動；選單不固定在畫面上方，避免佔掉閱讀空間 */
+            .nav-container.one-row {
+                position: static;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                padding: 12px;
+                overflow: visible;
+            }
+            .nav-container.one-row .nav-btn { padding: 8px 6px; font-size: 1rem; }
+            .nav-container.one-row .nav-btn .role { font-size: 0.72rem; margin-top: 2px; }
+            .nav-btn:hover, .nav-btn.active { transform: none; }
+
+            .content-container { padding: 20px 14px 40px; }
+            .section-title { font-size: 1.4rem; }
+            .section-sub { margin-bottom: 20px; font-size: 0.9rem; }
             .legend { display: flex; justify-content: center; margin: 8px 0 0; }
-            h1 { font-size: 1.5rem; }
-            .content-container { padding: 20px 15px; }
-            .grid { grid-template-columns: 1fr; gap: 20px; }
-            .card { padding: 24px; }
+            .grid { grid-template-columns: 1fr; gap: 16px; }
+            .card { padding: 22px 20px; border-radius: 14px; }
+            .card:hover { transform: none; }
+            .card-text { font-size: 1rem; line-height: 1.75; margin-bottom: 16px; }
+            .welcome-msg { margin-top: 30px; }
+            footer { padding: 20px; font-size: 0.8rem; }
+
+            /* 回到選單按鈕 */
+            .to-top { display: flex; }
         }
     </style>
 </head>
@@ -243,10 +263,6 @@
 <header>
     <h1>2026 野灣職業體驗營</h1>
     <p class="subtitle">想和講師們說的話</p>
-    <div class="mode-tabs">
-        <button class="mode-tab active" data-mode="instructor">依講師看</button>
-        <button class="mode-tab" data-mode="student">依學員看</button>
-    </div>
 </header>
 
 <nav id="nav" class="nav-container"></nav>
@@ -263,6 +279,8 @@
 
     <div id="card-grid" class="grid"></div>
 </main>
+
+<button id="to-top" class="to-top" hidden>↑ 選講師</button>
 
 <footer>
     WildOne 野灣野生動物保育協會 - 2026 職業體驗營回饋整理
@@ -503,13 +521,14 @@ const HIGHLIGHTS = [
 /* ===================== 以下是頁面運作程式，通常不用改 ===================== */
 
 const TEAM_KEY = '野灣團隊';
-let mode = 'instructor';
 
 const nav = document.getElementById('nav');
 const grid = document.getElementById('card-grid');
 const titleEl = document.getElementById('section-title');
 const subEl = document.getElementById('section-sub');
 const welcomeEl = document.getElementById('welcome-msg');
+const toTopBtn = document.getElementById('to-top');
+toTopBtn.addEventListener('click', () => nav.scrollIntoView({ behavior: 'smooth', block: 'start' }));
 
 function courseOf(key) {
     const found = INSTRUCTORS.find(i => i.key === key);
@@ -577,8 +596,10 @@ function render(title, sub, items) {
     }
     grid.replaceChildren(...items.map(buildCard));
 
-    if (window.innerWidth < 600) {
-        window.scrollTo({ top: nav.offsetTop + nav.offsetHeight, behavior: 'smooth' });
+    // 手機上點完講師，自動捲到留言開頭，並顯示「選講師」按鈕
+    if (window.innerWidth <= 600) {
+        titleEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        toTopBtn.hidden = false;
     }
 }
 
@@ -595,57 +616,17 @@ function showInstructor(key) {
     render(title, `${courseOf(key)}｜共 ${items.length} 則`, items);
 }
 
-function showStudent(name) {
-    const f = FEEDBACK.find(x => x.name === name);
-    const items = INSTRUCTORS
-        .filter(i => f[i.key] && f[i.key].trim())
-        .map(i => ({
-            student: name,
-            to: i.key,
-            content: f[i.key].trim(),
-            label: i.key === TEAM_KEY ? '給 野灣團隊' : `給 ${i.key}｜${i.course}`,
-            footer: name
-        }));
-    render(`${name} 的回饋`, `共寫給 ${items.length} 個對象`, items);
-}
-
 function buildNav() {
     nav.replaceChildren();
-    nav.classList.toggle('one-row', mode === 'instructor');
-
-    if (mode === 'instructor') {
-        INSTRUCTORS.forEach(i => {
-            const btn = el('button', 'nav-btn' + (i.key === TEAM_KEY ? ' overall' : ''));
-            btn.appendChild(document.createTextNode(i.key));
-            btn.appendChild(el('span', 'role', i.course));
-            btn.addEventListener('click', () => { setActive(btn); showInstructor(i.key); });
-            nav.appendChild(btn);
-        });
-    } else {
-        FEEDBACK.forEach(f => {
-            const btn = el('button', 'nav-btn student', f.name);
-            btn.addEventListener('click', () => { setActive(btn); showStudent(f.name); });
-            nav.appendChild(btn);
-        });
-    }
-}
-
-function resetView() {
-    grid.replaceChildren();
-    titleEl.hidden = true;
-    subEl.hidden = true;
-    welcomeEl.hidden = false;
-}
-
-document.querySelectorAll('.mode-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-        if (tab.dataset.mode === mode) return;
-        mode = tab.dataset.mode;
-        document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t === tab));
-        buildNav();
-        resetView();
+    nav.classList.add('one-row');
+    INSTRUCTORS.forEach(i => {
+        const btn = el('button', 'nav-btn' + (i.key === TEAM_KEY ? ' overall' : ''));
+        btn.appendChild(document.createTextNode(i.key));
+        btn.appendChild(el('span', 'role', i.course));
+        btn.addEventListener('click', () => { setActive(btn); showInstructor(i.key); });
+        nav.appendChild(btn);
     });
-});
+}
 
 document.getElementById('welcome-stats').textContent =
     `今年共有 ${FEEDBACK.length} 位學員留下回饋。`;
